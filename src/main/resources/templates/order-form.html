@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pizza Cloud</title>
+</head>
+<body>
+<div class="container">
+    <h1>Order your pizza</h1>
+
+    <img th:src="@{/pizza-sliced.jpg}"/>
+
+    <h3> Your pizzas in order:</h3>
+    <a th:href="@{/design}" id="another">Design another pizza</a>
+
+    <form th:action="@{/orders/remove}" method="post">
+        <ul>
+            <li th:each="pizza : ${pizzaOrder.pizzas}">
+                <span th:text="${pizza.name}">pizza name</span>
+                <!--              <input type="hidden" name="name" th:value="${pizza.name}" />-->
+                <input type="hidden" name="id" th:value="${pizza.id}"/>
+                <button type="submit">Delete</button>
+
+        </ul>
+    </form>
+    <br>
+    <!-- Display deleted pizza info -->
+    <div th:if="${deletedPizzaId}">
+        <p>Deleted Pizza ID: <span th:text="${deletedPizzaId}"></span></p>
+        <p>Deleted Pizza Name: <span th:text="${deletedPizzaName}"></span></p>
+    </div>
+    <br>
+    <form method="POST" th:action="@{/orders}" th:object="${pizzaOrder}">
+
+        <h3> Deliver my pizza to...</h3>
+        <label for="deliveryName">delivery Name: </label>
+        <input type="text" th:field="*{deliveryName}"/>
+
+        <span class="validationError"
+              th:if="${#fields.hasErrors('deliveryName')}"
+              th:errors="*{deliveryName}"
+              style="color:red">Delivery Name Error</span>
+        <br/>
+
+        <label for="deliveryCity">delivery City: </label>
+        <input type="text" th:field="*{deliveryCity}"/>
+        <span class="validationError"
+              th:if="${#fields.hasErrors('deliveryCity')}"
+              th:errors="*{deliveryCity}"
+              style="color:red">Delivery City Error</span>
+        <br/>
+
+        <label for="deliveryAddress">deliveryAddress: </label>
+        <input type="text" th:field="*{deliveryAddress}"/>
+        <span class="validationError"
+              th:if="${#fields.hasErrors('deliveryAddress')}"
+              th:errors="*{deliveryAddress}"
+              style="color:red">Delivery Address Error</span>
+        <br/>
+
+        <h3>Pay method</h3>
+        <label for="ccNumber">Credit Card #:</label>
+        <input type="text" th:field="*{ccNumber}">
+        <span class="validationError"
+              th:if="${#fields.hasErrors('ccNumber')}"
+              th:errors="*{ccNumber}"
+              style="color:red">CC Num Error</span>
+        <br/>
+
+        <h3>Pay method</h3>
+        <label for="ccExpiration">Expiration:</label>
+        <input type="text" th:field="*{ccExpiration}">
+        <span class="validationError"
+              th:if="${#fields.hasErrors('ccExpiration')}"
+              th:errors="*{ccExpiration}"
+              style="color:red">CC Expiration Error</span>
+        <br/>
+
+        <h3>Pay method</h3>
+        <label for="ccCVV">CVV :</label>
+        <input type="text" th:field="*{ccCVV}">
+        <span class="validationError"
+              th:if="${#fields.hasErrors('ccCVV')}"
+              th:errors="*{ccCVV}"
+              style="color:red">CC CVV Error</span>
+        <br/>
+
+        <input type="submit" value="Submit Order"/>
+
+    </form>
+</div>
+</body>
+</html>

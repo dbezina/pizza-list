@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Document home</title>
+    <title>Add CSS and JS to Thymeleaf</title>
+    <!--    <link th:href="@{/styles/cssandjs/main.css}" rel="stylesheet" />-->
+    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">-->
+    <link th:href="@{/styles/cssandjs/main.css}" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+</head>
+
+<form>
+    <body>
+    <div class="container">
+        <h2>Homepage</h2>
+        <span class="validationError"
+              th:text="${messageError}">messageError
+             style="color:red">Error</span>
+        <a th:href="@{/design}" id="another">Start order</a>
+        <br>
+        <br>
+        <img th:src="@{/images/signup-image.jpg}"/>
+    </div>
+    </body>
+</form>
+</html>

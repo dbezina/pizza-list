@@ -1,0 +1,101 @@
+package com.bezina.pizza.project.pizzalist.security;
+
+
+import com.bezina.pizza.project.pizzalist.DAO.UserRepository;
+import com.bezina.pizza.project.pizzalist.entity.User;
+import jakarta.servlet.DispatcherType;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
+@Configuration
+//@EnableWebSecurity
+public class SecurityConfig {
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(UserRepository userRepo) {
+        return username -> {
+            User user = userRepo.findByUsername(username);
+            if (user != null) return user;
+            throw new UsernameNotFoundException("User " + username + " not found");
+        };
+    }
+
+
+  /*  @Bean
+    public UserDetailsService userDetailService(PasswordEncoder passwordEncoder) {
+     List<UserDetails> userList = new ArrayList<>();
+        userList.add(new User("user1",passwordEncoder.encode("password"),
+                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))));
+        userList.add(new User("user2",passwordEncoder.encode("password"),
+                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))));
+        return new InMemoryUserDetailsManager(userList);
+    }*/
+
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        //     HeaderWriterLogoutHandler clearSiteData = new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter());
+
+        return http
+
+                .authorizeHttpRequests((authorize) -> authorize
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+
+                        .requestMatchers("/design", "/orders/**")
+                        //   .hasAnyRole("USER","ADMIN")
+                        //   .hasAuthority("USER")
+                        .authenticated()
+
+
+                        .requestMatchers("/register", "/home")
+                        .permitAll()
+
+                        .anyRequest()
+                        .denyAll()
+                )
+                /*    .authorizeHttpRequests((authorize) -> authorize
+                            .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+                            .requestMatchers("/login").permitAll()
+                            .anyRequest().denyAll()
+                    )*/
+
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .failureForwardUrl("/home")
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/design")
+                        .permitAll()
+                )
+                .logout((logout) -> logout
+                        .logoutUrl("/logout")// URL for logout
+                        .logoutSuccessUrl("/logout")// Redirect after logout
+                        //   .addLogoutHandler(clearSiteData)
+                        .invalidateHttpSession(true) // Invalidate the HTTP session
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                )
+                .httpBasic(withDefaults())
+                .build();
+
+      /*  http
+                .authorizeHttpRequests((authz) -> authz
+                        .anyRequest().authenticated()
+                )
+                .httpBasic(withDefaults());
+        return http.build();*/
+    }
+}
