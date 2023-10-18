@@ -3,7 +3,9 @@ package com.bezina.pizza.project.pizzalist.security;
 
 import com.bezina.pizza.project.pizzalist.DAO.UserRepository;
 import com.bezina.pizza.project.pizzalist.entity.User;
+import com.bezina.pizza.project.pizzalist.services.CustomUserDetailsService;
 import jakarta.servlet.DispatcherType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,14 +35,28 @@ public class SecurityConfig {
     }
 
 
-  /*  @Bean
-    public UserDetailsService userDetailService(PasswordEncoder passwordEncoder) {
-     List<UserDetails> userList = new ArrayList<>();
-        userList.add(new User("user1",passwordEncoder.encode("password"),
-                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))));
-        userList.add(new User("user2",passwordEncoder.encode("password"),
-                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))));
-        return new InMemoryUserDetailsManager(userList);
+    /*  @Bean
+      public UserDetailsService userDetailService(PasswordEncoder passwordEncoder) {
+       List<UserDetails> userList = new ArrayList<>();
+          userList.add(new User("user1",passwordEncoder.encode("password"),
+                  Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))));
+          userList.add(new User("user2",passwordEncoder.encode("password"),
+                  Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))));
+          return new InMemoryUserDetailsManager(userList);
+      }*/
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+  /*  @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .antMatchers("/design", "/orders/**").hasRole("USER")
+                // Other authorization rules
+                .and()
+                .formLogin()
+                .and()
+                .userDetailsService(customUserDetailsService);
     }*/
 
 
@@ -49,22 +65,27 @@ public class SecurityConfig {
         //     HeaderWriterLogoutHandler clearSiteData = new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter());
 
         return http
-
+                .userDetailsService(customUserDetailsService)
                 .authorizeHttpRequests((authorize) -> authorize
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
 
                         .requestMatchers("/design", "/orders/**")
                         //   .hasAnyRole("USER","ADMIN")
-                        //   .hasAuthority("USER")
-                        .authenticated()
+                        .hasAuthority("ROLE_USER")
+                        //   .authenticated()
 
+                        .requestMatchers("/all")
+                        .hasAuthority("ROLE_ADMIN")
+                        //   .hasAnyRole("ADMIN")
 
                         .requestMatchers("/register", "/home")
                         .permitAll()
 
+
                         .anyRequest()
                         .denyAll()
                 )
+
                 /*    .authorizeHttpRequests((authorize) -> authorize
                             .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                             .requestMatchers("/login").permitAll()
@@ -88,6 +109,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
+
                 .httpBasic(withDefaults())
                 .build();
 
