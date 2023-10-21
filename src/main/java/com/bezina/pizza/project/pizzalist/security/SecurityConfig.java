@@ -4,7 +4,6 @@ package com.bezina.pizza.project.pizzalist.security;
 import com.bezina.pizza.project.pizzalist.DAO.UserRepository;
 import com.bezina.pizza.project.pizzalist.entity.User;
 import com.bezina.pizza.project.pizzalist.services.CustomUserDetailsService;
-import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +13,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 //@EnableWebSecurity
@@ -67,23 +64,27 @@ public class SecurityConfig {
         return http
                 .userDetailsService(customUserDetailsService)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+                                //     .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
 
-                        .requestMatchers("/design", "/orders/**")
-                        //   .hasAnyRole("USER","ADMIN")
-                        .hasAuthority("ROLE_USER")
-                        //   .authenticated()
+                                .requestMatchers("/design", "/orders/**")
 
-                        .requestMatchers("/all")
-                        .hasAuthority("ROLE_ADMIN")
-                        //   .hasAnyRole("ADMIN")
+                                //   .hasAnyRole("USER","ADMIN")
+                                .hasAuthority("ROLE_USER")
+                                //   .authenticated()
 
-                        .requestMatchers("/register", "/home")
-                        .permitAll()
+                                .requestMatchers("/static/**").permitAll() // Permit access to static resources
+
+                                .requestMatchers("/all")
+                                .hasAuthority("ROLE_ADMIN")
+                                //   .hasAnyRole("ADMIN")
+
+                                .requestMatchers("/register", "/home")
+                                .permitAll()
 
 
-                        .anyRequest()
-                        .denyAll()
+                                .anyRequest()
+                                .authenticated()
+                        // .denyAll()
                 )
 
                 /*    .authorizeHttpRequests((authorize) -> authorize
@@ -96,21 +97,20 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .failureForwardUrl("/home")
                         .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/design", true)
                         .usernameParameter("username")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/design")
                         .permitAll()
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/logout")// URL for logout
-                        .logoutSuccessUrl("/logout")// Redirect after logout
+                        .logoutSuccessUrl("/home")// Redirect after logout
                         //   .addLogoutHandler(clearSiteData)
                         .invalidateHttpSession(true) // Invalidate the HTTP session
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
 
-                .httpBasic(withDefaults())
                 .build();
 
       /*  http

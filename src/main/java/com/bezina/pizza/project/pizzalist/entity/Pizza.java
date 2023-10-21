@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +20,7 @@ public class Pizza {
     private Integer id;
 
     private Date createdAt;
+
     @NotNull
     @Size(min = 5, message = "Please min 5 symbols")
     private String name;

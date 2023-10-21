@@ -19,11 +19,12 @@
     <!--        <p>You are not authenticated. Please <a href="/login">log in</a>.</p>-->
     <!--    </div>-->
 
-    <img th:scr="@{/images/start.jpg}"/>
+    <img th:scr="@{/images/6-cuts.png}"/>
     <br>
-    <img th:scr="@{/resources/static/images/1.png}"/>
+    <img th:scr="@{/resources/static/images/6-cuts.png}"/>
 
-    <form method="POST" th:object="${pizza}">
+
+    <form method="POST" th:object="${pizza}" th:action="@{/orders}">
         <div class="grid">
             <div class="ingredient-group" id="veggies">
                 <h3>Determine your veggies:</h3>
@@ -61,8 +62,12 @@
         <div>
             <h3>Name your own pizza</h3>
             <input type="text" th:field="*{name}"/>
+            <span class="validationError"
+                  th:if="${#fields.hasErrors('name')}"
+                  th:errors="*{name}"
+                  style="color:red">Pizza Name Error</span>
             <br/>
-            <!-- <button>Submit your pizza</button>-->
+            <button>Submit your pizza</button>
         </div>
         <br>
         <div class="input-group mb-3" style="width:50%;">
@@ -70,7 +75,10 @@
         </div>
     </form>
 
-    <!--<p><a href="/logout" />Logout</a>-->
+    <!--   <p><a href="/logout" />Logout</a>-->
+    <form method="POST" th:action="@{/logout}" id="logoutForm">
+        <button type="submit" value="Logout" class="btn btn-secondary mb-3">Logout</button>
+    </form>
     <a th:href="@{/logout}">Logout</a>
     </p>
 </div>

@@ -25,6 +25,7 @@ public class PizzaOrder implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private Integer id;
+
     @Column(name = "placed_at")
     private Date placedAt = new Date();
 
@@ -55,6 +56,12 @@ public class PizzaOrder implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Pizza> pizzas = new ArrayList<>();
+   /* @JoinTable(
+            name = "pizza",
+            joinColumns = @JoinColumn(name = ""),
+            inverseJoinColumns = @JoinColumn(name = "id")
+    )*/
+
 
     public void addPizza(Pizza pizza) {
         this.pizzas.add(pizza);

@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.*;
 
 
 @Data
@@ -30,8 +30,7 @@ public class Ingredient {
 
 
    public enum Type{
-        MEAT, CHEESE, SAUCE, VEGGIES
-    }*/
-
+        MEAT, CHEESE, SAUCE, VEGGIES    }
+*/
 
 }
