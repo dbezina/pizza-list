@@ -70,6 +70,9 @@ public class PizzaOrder implements Serializable {
             mappedBy = "pizzaOrder")
     private List<Pizza> pizzas = new ArrayList<>();
 
+    @Transient
+    private List<Pizza> deletedPizzas = new ArrayList<>();
+
     public void addPizza(Pizza pizza) {
         this.setPizzasAmount(this.getPizzasAmount() + 1);
         pizza.setOrder_key((long) this.getPizzasAmount());
@@ -88,6 +91,7 @@ public class PizzaOrder implements Serializable {
             if (pizza.getName().equals(pizzaName)) {
                 deletedPizza = pizza;
                 this.pizzas.remove(pizza);
+                this.deletedPizzas.add(deletedPizza);
                 return deletedPizza;
             }
         }
@@ -112,6 +116,23 @@ public class PizzaOrder implements Serializable {
             }
         }
         return null;
+    }
+
+    public void undoRemove(String pizzaName) {
+        for (Pizza pizza : this.getDeletedPizzas()) {
+            if (pizza.getName().equals(pizzaName)) {
+                this.pizzas.add(pizza);
+                this.deletedPizzas.remove(pizza);
+            }
+        }
+    }
+
+    public void setKeysToPizzas() {
+        long i = 0L;
+        for (Pizza pizza : this.getPizzas()) {
+            pizza.setOrder_key(++i);
+        }
+        this.setPizzasAmount((int) i);
     }
 
 }

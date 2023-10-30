@@ -37,6 +37,8 @@ public class OrderController {
         if (errors.hasErrors()) return "order-form";
         try {
             pizzaOrder.setCreatedAt(new Date());
+            //   pizzaOrder.setKeysToPizzasInOrder();
+            pizzaOrder.setKeysToPizzas();
             orderRepo.save(pizzaOrder);
             log.info("Order submitted: {}", pizzaOrder);
             sessionStatus.setComplete();
@@ -76,8 +78,10 @@ public class OrderController {
     public String removePizza(@PathVariable String pizzaName,
                               @ModelAttribute("pizzaOrder") PizzaOrder pizzaOrder,
                               Model model) {
+
         Pizza deletedPizza = pizzaOrder.removePizza(pizzaName);
-        model.addAttribute("deletedPizza", deletedPizza);
+
+        //     model.addAttribute("deletedPizza", deletedPizza);
         return "redirect:/orders/current";
     }
 
@@ -85,11 +89,8 @@ public class OrderController {
     public String undoRemovePizza(@PathVariable String pizzaName,
                                   @ModelAttribute("pizzaOrder") PizzaOrder pizzaOrder,
                                   Model model) {
-        //  Pizza deletedPizza = pizzaOrder.undoRemovePizza(pizzaOrder, pizzaName);
-        Pizza unDeletedPizza = new Pizza();
-        model.getAttribute("deletedPizza");
-        pizzaOrder.addPizza(unDeletedPizza);
-        model.addAttribute("deletedPizza", null); // Clear the deleted pizza
+        pizzaOrder.undoRemove(pizzaName);
+        //  model.addAttribute("deletedPizza", null); // Clear the deleted pizza
         return "redirect:/orders/current";
     }
 }

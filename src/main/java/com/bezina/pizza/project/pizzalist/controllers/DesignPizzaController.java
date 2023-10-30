@@ -34,7 +34,8 @@ public class DesignPizzaController {
     public void addIngredientsToModel(Model model) {
         // Iterable<Ingredient> ingredients = ingredientRepo.findAll();
         log.info("addIngredientsToModel");
-        List<Ingredient> ingredients = (List<Ingredient>) ingredientRepo.findAll();
+        //   List<Ingredient> ingredients = (List<Ingredient>) ingredientRepo.findAll();
+        Iterable<Ingredient> ingredients = ingredientRepo.findAll();
         for (Ingredient ingredient : ingredients) {
             log.info(ingredient.toString());
         }
