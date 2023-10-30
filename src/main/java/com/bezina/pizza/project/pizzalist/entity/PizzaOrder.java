@@ -2,9 +2,11 @@ package com.bezina.pizza.project.pizzalist.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.CreditCardNumber;
@@ -17,17 +19,22 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "pizza_order")
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC, force = true)
 public class PizzaOrder implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
+    @Column
     private Integer id;
 
-    @Column(name = "placed_at")
-    private Date placedAt = new Date();
+    @Column
+    private Date createdAt;
+
+    /*@Column(name = "placed_at")
+    private Date placedAt = new Date();*/
 
     @NotBlank(message = "Delivery name is required")
     @Column(name = "delivery_name")
@@ -54,16 +61,19 @@ public class PizzaOrder implements Serializable {
     @Column
     private String ccCVV;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pizza> pizzas = new ArrayList<>();
-   /* @JoinTable(
-            name = "pizza",
-            joinColumns = @JoinColumn(name = ""),
-            inverseJoinColumns = @JoinColumn(name = "id")
-    )*/
+    @Min(value = 1, message = "You can't proceed order with no pizzas")
+    @Column(name = "pizzas_amount")
+    private int pizzasAmount = 0;
 
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            mappedBy = "pizzaOrder")
+    private List<Pizza> pizzas = new ArrayList<>();
 
     public void addPizza(Pizza pizza) {
+        this.setPizzasAmount(this.getPizzasAmount() + 1);
+        pizza.setOrder_key((long) this.getPizzasAmount());
+        pizza.setPizzaOrder(this);
         this.pizzas.add(pizza);
     }
 
@@ -71,23 +81,34 @@ public class PizzaOrder implements Serializable {
         this.pizzas.remove(index);
     }
 
-    public void removePizza(String pizzaName) {
+    public Pizza removePizza(String pizzaName) {
         //this.pizzas.remove(new Pizza());
+        Pizza deletedPizza = new Pizza();
         for (Pizza pizza : pizzas) {
             if (pizza.getName().equals(pizzaName)) {
+                deletedPizza = pizza;
                 this.pizzas.remove(pizza);
-                break;
+                return deletedPizza;
             }
         }
+        return null;
     }
 
-    public Pizza removePizza(Integer id) {
-        //this.pizzas.remove(new Pizza());
+    /* public Pizza removePizza(Integer id) {
+         //this.pizzas.remove(new Pizza());
+         for (Pizza pizza : pizzas) {
+             if (pizza.getId() == id) {
+                 Pizza deletedItem = pizza;
+                 this.pizzas.remove(pizza);
+                 return deletedItem;
+             }
+         }
+         return null;
+     }*/
+    public Pizza findPizzaByName(String pizzaName) {
         for (Pizza pizza : pizzas) {
-            if (pizza.getId() == id) {
-                Pizza deletedItem = pizza;
-                this.pizzas.remove(pizza);
-                return deletedItem;
+            if (pizza.getName().equals(pizzaName)) {
+                return pizza;
             }
         }
         return null;

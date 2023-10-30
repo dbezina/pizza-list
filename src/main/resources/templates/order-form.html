@@ -16,25 +16,65 @@
     <!--    <img src="/static/pizza-sliced.jpg" alt="Pizza Sliced">-->
 
 
-    <h3> Your pizzas in order:</h3>
-    <a th:href="@{/design}" id="another">Design another pizza</a>
+    <!--    <h3> Your pizzas in order:</h3>-->
+    <!--    <a th:href="@{/design}" id="another">Design another pizza</a>-->
 
+    <!--    <form th:action="@{/orders/remove}" method="post">-->
+    <!--        <ul>-->
+    <!--            <li th:each="pizza : ${pizzaOrder.pizzas}">-->
+    <!--                <span th:text="${pizza.name}">pizza name</span>-->
+    <!--                &lt;!&ndash;              <input type="hidden" name="name" th:value="${pizza.name}" />&ndash;&gt;-->
+    <!--                <input type="hidden" name="id" th:value="${pizza.id}"/>-->
+    <!--                <button type="submit">Delete</button>-->
+    <!--            </li>-->
+    <!--        </ul>-->
+    <!--    </form>-->
+    <!--    <br>-->
+    <!--    &lt;!&ndash; Display deleted pizza info &ndash;&gt;-->
+    <!--    <div th:if="${deletedPizzaId}">-->
+    <!--        <p>Deleted Pizza ID: <span th:text="${deletedPizzaId}"></span></p>-->
+    <!--        <p>Deleted Pizza Name: <span th:text="${deletedPizzaName}"></span></p>-->
+    <!--    </div>-->
     <form th:action="@{/orders/remove}" method="post">
+        <h3> Your pizzas in order:</h3>
+        <a th:href="@{/design}" id="another">Design another pizza</a>
         <ul>
             <li th:each="pizza : ${pizzaOrder.pizzas}">
                 <span th:text="${pizza.name}">pizza name</span>
-                <!--              <input type="hidden" name="name" th:value="${pizza.name}" />-->
-                <input type="hidden" name="id" th:value="${pizza.id}"/>
+                <span th:text="${pizza.id}">pizza id</span>
+                <span th:text="${pizza.createdAt}">pizza created at</span>
+                <input type="hidden" name="name" th:value="${pizza.name}"/>
                 <button type="submit">Delete</button>
+            </li>
         </ul>
     </form>
     <br>
-    <!-- Display deleted pizza info -->
-    <div th:if="${deletedPizzaId}">
-        <p>Deleted Pizza ID: <span th:text="${deletedPizzaId}"></span></p>
-        <p>Deleted Pizza Name: <span th:text="${deletedPizzaName}"></span></p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="pizza : ${pizzaOrder.pizzas}">
+            <td th:text="${pizza.name}">Pizza Name</td>
+            <td>
+                <form th:action="@{'/orders/remove/' + ${pizza.name}}" method="post">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:if="${deletedPizza != null}">
+        <p>Pizza <span th:text="${deletedPizza.name}">Deleted Pizza Name</span> has been deleted.</p>
+        <form th:action="@{'/orders/undoRemove/' + ${deletedPizza.name}}" method="post">
+            <button type="submit">Undo</button>
+        </form>
     </div>
-    <br>
+
     <form method="POST" th:action="@{/orders}" th:object="${pizzaOrder}">
 
         <h3> Deliver my pizza to...</h3>

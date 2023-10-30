@@ -1,23 +1,21 @@
 package com.bezina.pizza.project.pizzalist.controllers;
 
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-
 import com.bezina.pizza.project.pizzalist.DAO.IngredientRepository;
 import com.bezina.pizza.project.pizzalist.entity.Ingredient;
 import com.bezina.pizza.project.pizzalist.entity.Pizza;
 import com.bezina.pizza.project.pizzalist.entity.PizzaOrder;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
-
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequestMapping("/design")
 @Slf4j
@@ -34,8 +32,12 @@ public class DesignPizzaController {
 
     @ModelAttribute
     public void addIngredientsToModel(Model model) {
-        Iterable<Ingredient> ingredients = ingredientRepo.findAll();
-
+        // Iterable<Ingredient> ingredients = ingredientRepo.findAll();
+        log.info("addIngredientsToModel");
+        List<Ingredient> ingredients = (List<Ingredient>) ingredientRepo.findAll();
+        for (Ingredient ingredient : ingredients) {
+            log.info(ingredient.toString());
+        }
 
       /*  List<Ingredient> ingredients = Arrays.asList(
             new Ingredient(1,"CHED","Cheddar", Ingredient.Type.CHEESE),
@@ -50,11 +52,19 @@ public class DesignPizzaController {
             model.addAttribute(type.toString().toLowerCase(),
                     filterByType((List<Ingredient>) ingredients, type));
         }*/
-        String[] types = {"MEAT", "CHEESE", "SAUCE", "VEGGIES"};
+  /*      String[] types = {"MEAT", "CHEESE", "SAUCE", "VEGGIES"};
         for (String type : types) {
             model.addAttribute(type.toLowerCase(),
                     filterByType((List<Ingredient>) ingredients, type));
+        }*/
+        Ingredient.Type[] types = Ingredient.Type.values();
+        for (Ingredient.Type type : types) {
+//            log.info(type.toString().toLowerCase());
+//            log.info(filterByType((List<Ingredient>) ingredients, type).toString());
+            model.addAttribute(type.toString().toLowerCase(),
+                    filterByType((List<Ingredient>) ingredients, type));
         }
+
     }
 
     @ModelAttribute(name = "pizzaOrder")
@@ -78,7 +88,7 @@ public class DesignPizzaController {
                   .filter(x ->x.getType().equals(type))
                   .collect(Collectors.toList());
       }*/
-    private Iterable<Ingredient> filterByType(List<Ingredient> ingredients, String type) {
+    private Iterable<Ingredient> filterByType(List<Ingredient> ingredients, Ingredient.Type type) {
         return ingredients
                 .stream()
                 .filter(x -> x.getType().equals(type))
@@ -97,12 +107,14 @@ public class DesignPizzaController {
                                Errors errors,
                                @ModelAttribute PizzaOrder pizzaOrder) {
         if (errors.hasErrors()) return "design-form";
+        pizza.setIngredientsStr(pizza.getIngredientsString());
         pizza.setCreatedAt(new Date());
-
+        pizza.setOrder_key(1L);
         pizzaOrder.addPizza(pizza);
+
         log.info("Processing pizza: {}", pizza);
-        return "home";
-        //   return "redirect:/orders/current";
+        //  return "home";
+        return "redirect:/orders/current";
         //    return new ModelAndView("redirect:/orders/current");
 
 
