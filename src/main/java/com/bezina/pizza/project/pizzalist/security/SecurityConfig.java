@@ -110,7 +110,12 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
-
+                .oauth2Login(httpSecurityOAuth2LoginConfigurer ->
+                        httpSecurityOAuth2LoginConfigurer
+                                .loginPage("/login")
+                                .defaultSuccessUrl("/design", true)
+                                .permitAll()
+                )
                 .build();
 
       /*  http

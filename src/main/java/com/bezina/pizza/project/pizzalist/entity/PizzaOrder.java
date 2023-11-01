@@ -9,7 +9,9 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.CreditCardNumber;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.List;
 @Table(name = "pizza_order")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC, force = true)
+@Slf4j
 public class PizzaOrder implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -70,8 +73,16 @@ public class PizzaOrder implements Serializable {
             mappedBy = "pizzaOrder")
     private List<Pizza> pizzas = new ArrayList<>();
 
+    @ManyToOne
+    private User user;
+
     @Transient
     private List<Pizza> deletedPizzas = new ArrayList<>();
+
+    @Transient
+    private final Object monitor1 = new Object();
+    //  @Transient
+    //  private final Object monitor2 = new Object();
 
     public void addPizza(Pizza pizza) {
         this.setPizzasAmount(this.getPizzasAmount() + 1);
@@ -87,13 +98,14 @@ public class PizzaOrder implements Serializable {
     public Pizza removePizza(String pizzaName) {
         //this.pizzas.remove(new Pizza());
         Pizza deletedPizza = new Pizza();
+        log.info("remove Pizza " + pizzaName);
         for (Pizza pizza : pizzas) {
             if (pizza.getName().equals(pizzaName)) {
                 deletedPizza = pizza;
                 this.pizzas.remove(pizza);
                 this.deletedPizzas.add(deletedPizza);
-                return deletedPizza;
             }
+            return deletedPizza;
         }
         return null;
     }
@@ -119,13 +131,17 @@ public class PizzaOrder implements Serializable {
     }
 
     public void undoRemove(String pizzaName) {
+
+        log.info("undo remove Pizza " + pizzaName);
+
         for (Pizza pizza : this.getDeletedPizzas()) {
             if (pizza.getName().equals(pizzaName)) {
-                this.pizzas.add(pizza);
                 this.deletedPizzas.remove(pizza);
+                this.pizzas.add(pizza);
             }
         }
     }
+
 
     public void setKeysToPizzas() {
         long i = 0L;
@@ -133,6 +149,10 @@ public class PizzaOrder implements Serializable {
             pizza.setOrder_key(++i);
         }
         this.setPizzasAmount((int) i);
+    }
+
+    public void toBcryptFormat(PasswordEncoder passwordEncoder) {
+        this.ccCVV = passwordEncoder.encode(this.ccCVV);
     }
 
 }

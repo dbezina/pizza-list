@@ -1,16 +1,20 @@
 package com.bezina.pizza.project.pizzalist.controllers;
 
 import com.bezina.pizza.project.pizzalist.DAO.OrderRepository;
+import com.bezina.pizza.project.pizzalist.DAO.UserRepository;
 import com.bezina.pizza.project.pizzalist.entity.Pizza;
 import com.bezina.pizza.project.pizzalist.entity.PizzaOrder;
+import com.bezina.pizza.project.pizzalist.entity.User;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 
+import java.security.Principal;
 import java.util.Date;
 
 @Slf4j
@@ -19,9 +23,14 @@ import java.util.Date;
 @SessionAttributes("pizzaOrder")
 public class OrderController {
     private OrderRepository orderRepo;
+    private UserRepository userRepository;
 
-    public OrderController(OrderRepository orderRepo) {
+    private PasswordEncoder passwordEncoder;
+
+    public OrderController(OrderRepository orderRepo, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.orderRepo = orderRepo;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/current")
@@ -33,12 +42,15 @@ public class OrderController {
     public String processOrder(@Valid PizzaOrder pizzaOrder,
                                Errors errors,
                                SessionStatus sessionStatus,
+                               Principal principal,
                                Model model) {
         if (errors.hasErrors()) return "order-form";
         try {
+            User user = userRepository.findByUsername(principal.getName());
+            pizzaOrder.setUser(user);
             pizzaOrder.setCreatedAt(new Date());
-            //   pizzaOrder.setKeysToPizzasInOrder();
             pizzaOrder.setKeysToPizzas();
+            //  pizzaOrder.toBcryptFormat(passwordEncoder);
             orderRepo.save(pizzaOrder);
             log.info("Order submitted: {}", pizzaOrder);
             sessionStatus.setComplete();
@@ -78,8 +90,18 @@ public class OrderController {
     public String removePizza(@PathVariable String pizzaName,
                               @ModelAttribute("pizzaOrder") PizzaOrder pizzaOrder,
                               Model model) {
-
-        Pizza deletedPizza = pizzaOrder.removePizza(pizzaName);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Pizza deletedPizza = pizzaOrder.removePizza(pizzaName);
+            }
+        });
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        thread.start();
 
         //     model.addAttribute("deletedPizza", deletedPizza);
         return "redirect:/orders/current";
@@ -89,7 +111,18 @@ public class OrderController {
     public String undoRemovePizza(@PathVariable String pizzaName,
                                   @ModelAttribute("pizzaOrder") PizzaOrder pizzaOrder,
                                   Model model) {
-        pizzaOrder.undoRemove(pizzaName);
+        Thread undoThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                pizzaOrder.undoRemove(pizzaName);
+            }
+        });
+        try {
+            undoThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        undoThread.start();
         //  model.addAttribute("deletedPizza", null); // Clear the deleted pizza
         return "redirect:/orders/current";
     }
